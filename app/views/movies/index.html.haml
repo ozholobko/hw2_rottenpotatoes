@@ -3,7 +3,7 @@
 
 = form_tag movies_path, :method => :get do
   Include:
-  = hidden_field_tag :sort_by, params[:sort_by]
+  = hidden_field_tag :sort_by, session[:sort_by]
   - @all_ratings.each do |rating|
     = rating
     = check_box_tag "ratings[#{rating}]", 1, @checked_boxes[rating]
@@ -13,11 +13,11 @@
   %thead
     %tr
       %th{ class: @hilite_title_header }
-        = link_to "Movie Title", movies_path({:sort_by => :title, :ratings => params[:ratings]}),
+        = link_to "Movie Title", movies_path({:sort_by => :title, :ratings => session[:ratings]}),
                   id: 'title_header'
       %th Rating
       %th{ class: @hilite_date_header }
-        = link_to "Release Date", movies_path({:sort_by => :release_date, :ratings => params[:ratings]}),
+        = link_to "Release Date", movies_path({:sort_by => :release_date, :ratings => session[:ratings]}),
                   id: 'release_date_header'
       %th More Info
   %tbody

@@ -8,23 +8,38 @@ class MoviesController < ApplicationController
 
   def index
     get_all_ratings
-    if params.has_key?(:ratings)
-       params[:ratings].keys.map{|x| @checked_boxes[x] = true}
-       @movies = Movie.where(:rating => params[:ratings].keys)
+    if !session.has_key?(:ratings) && !session.has_key?(:sort_by)
+   
+      session[:ratings] = params[:ratings]
+      session[:sort_by] = params[:sort_by]
+      if params.has_key?(:ratings)
+        params[:ratings].keys.map{|x| @checked_boxes[x] = true}
+        @movies = Movie.where(:rating => params[:ratings].keys)
       end
-    if params.has_key? :sort_by
-      if @movies.nil? || @movies.empty?
-        @movies = Movie.order params[:sort_by]
+      if params.has_key? :sort_by
+        if @movies.nil? || @movies.empty?
+          @movies = Movie.order params[:sort_by]
+        else
+          @movies = @movies.order params[:sort_by]
+        end
+        if params[:sort_by] == 'title'
+          @hilite_title_header = 'hilite'
+        elsif params[:sort_by] == 'release_date'
+          @hilite_date_header = 'hilite'
+        end
       else
-        @movies = @movies.order params[:sort_by]
-      end
-      if params[:sort_by] == 'title'
-        @hilite_title_header = 'hilite'
-      elsif params[:sort_by] == 'release_date'
-        @hilite_date_header = 'hilite'
+        @movies = Movie.all
       end
     else
-      @movies = Movie.all
+      if !params.has_key?(:ratings)
+        params[:ratings] = session[:ratings]
+      end
+      if !params.has_key?(:sort_by)
+        params[:sort_by] = session[:sort_by]
+      end
+      session.delete(:ratings)
+      session.delete(:sort_by)
+      redirect_to movies_path :sort_by => params[:sort_by], :ratings => params[:ratings]
     end
   end
 
