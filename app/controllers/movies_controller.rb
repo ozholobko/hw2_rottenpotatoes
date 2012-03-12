@@ -7,9 +7,17 @@ class MoviesController < ApplicationController
   end
 
   def index
+    get_all_ratings
+    if params.has_key?(:ratings)
+       params[:ratings].keys.map{|x| @checked_boxes[x] = true}
+       @movies = Movie.where(:rating => params[:ratings].keys)
+      end
     if params.has_key? :sort_by
-      @movies = Movie.order params[:sort_by]
-      # This is pretty ugly:
+      if @movies.nil? || @movies.empty?
+        @movies = Movie.order params[:sort_by]
+      else
+        @movies = @movies.order params[:sort_by]
+      end
       if params[:sort_by] == 'title'
         @hilite_title_header = 'hilite'
       elsif params[:sort_by] == 'release_date'
@@ -47,5 +55,15 @@ class MoviesController < ApplicationController
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
   end
+  
+  def get_all_ratings
+    @all_ratings =[]
+    Movie.select(:rating).map{|movie| @all_ratings.push(movie.rating)}
+    @all_ratings = @all_ratings.uniq.sort
+    if @checked_boxes.nil?
+      @checked_boxes = {}
+    end
+    @all_ratings.map{|x| @checked_boxes[x] = false}
+  end 
 
 end
